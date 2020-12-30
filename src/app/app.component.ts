@@ -30,7 +30,11 @@ export class AppComponent implements OnInit{
   @Input()
   public xEqualsString = 'cos(t / 10) * 500 + a';
   @Input()
+  public xEqualsConstantReplaced = '';
+  @Input()
   public yEqualsString = 'sin(t / 10) * 500 + 500 + b';
+  @Input()
+  public yEqualsConstantReplaced = '';
   @Input()
   public tStartString = 0;
   @Input()
@@ -40,12 +44,26 @@ export class AppComponent implements OnInit{
 
   public constants: Constant[] = [];
 
+  public static replaceAll(input: string, substr: string, newSubstr: string): string{
+    return input.split(substr).join(newSubstr);
+  }
+
+  public static removeAll(input: string, substr: string): string{
+    return AppComponent.replaceAll(input, substr, '');
+  }
+
   static getConstants(formula: string): Set<string> {
-    return new Set((formula.replace('cos', '').replace('sin', '').replace(/[^a-zA-Z]+/g, '')));
+    let exprRemoved =  AppComponent.removeAll(formula, 'cos');
+    exprRemoved = AppComponent.removeAll(exprRemoved, 'sin');
+    return new Set(exprRemoved.replace(/[^a-zA-Z]+/g, ''));
   }
 
   public draw(): void {
-    let constantsChars =  [...new Set([...AppComponent.getConstants(this.xEqualsString), ...AppComponent.getConstants(this.yEqualsString)])];
+    let constantsChars =  [...new Set(
+        [...AppComponent.getConstants(this.xEqualsString),
+      ...AppComponent.getConstants(this.yEqualsString)]
+    )];
+
     constantsChars = constantsChars.filter(c => c !== 't');
     constantsChars.sort((one, two) => (one > two ? 1 : -1));
     for (const constant of constantsChars) {
@@ -54,6 +72,8 @@ export class AppComponent implements OnInit{
       }
       this.constants.push({name: constant, text: 1, sliderFrom: 0, sliderTo: 100});
     }
+
+    this.setFunctionsWithLettersReplacedWithNumbers();
 
     // Remove aditional constant items
     this.constants = this.constants.filter(c => constantsChars.find(cc => cc === c.name));
@@ -112,6 +132,40 @@ export class AppComponent implements OnInit{
   public onSliderInputChange($event: MatSliderChange, constant: Constant): void {
     constant.text = $event.value;
     this.draw();
+  }
+
+  public goFullscreen(): void {
+    const elem = document.documentElement as any;
+    const methodToBeInvoked = elem.requestFullscreen ||
+      elem.webkitRequestFullScreen || elem.mozRequestFullscreen
+      ||
+      elem.msRequestFullscreen;
+    if (methodToBeInvoked) {
+      methodToBeInvoked.call(elem);
+    }
+  }
+
+  private  getFunctionsWithLettersReplacedWithNumbers(rawFunction: string): string {
+    const expressions = ['sin', 'cos'];
+
+    let str = rawFunction;
+    for (const expr of expressions) {
+      str = AppComponent.replaceAll(str, expr, '#' + expressions.indexOf(expr) + '#');
+    }
+
+    for (const constant of this.constants) {
+      str = AppComponent.replaceAll(str, constant.name, constant.text.toString());
+    }
+
+    for (const expr of expressions) {
+      str = AppComponent.replaceAll(str, '#' + expressions.indexOf(expr) + '#', expr);
+    }
+    return str;
+  }
+
+  private setFunctionsWithLettersReplacedWithNumbers(): void {
+    this.xEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.xEqualsString);
+    this.yEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.yEqualsString);
   }
 }
 
