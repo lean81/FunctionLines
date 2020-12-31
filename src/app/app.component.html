@@ -1,5 +1,5 @@
 <div class="d-flex flex-row" style="background-color:lightslategrey; height: 100vh; width: 100vw;" (window:resize)="onWindowResize($event)">
-  <div class="d-flex flex-grow-1 flex-column overflow-auto p-2" style="max-width: 300px">
+  <div class="d-flex flex-grow-1 flex-column overflow-auto p-2 pr-5" style="max-width: 300px">
     <div class="d-flex flex-row p-1">Navn<input class="flex-grow-1 pl-1" [(ngModel)]="name" (ngModelChange)="draw()"/></div>
     <div class="d-flex flex-row p-1">x=<input class="flex-grow-1" [(ngModel)]="xEqualsString" (ngModelChange)="draw()"/></div>
     {{xEqualsConstantReplaced}}
@@ -14,9 +14,9 @@
         <input style="min-width: 0px" type="number" [(ngModel)]="constant.text" (ngModelChange)="draw()"/>
       </div>
     </div>
-    <div class="d-flex flex-row p-1 pt-3">t start=<input class="flex-grow-1"  type="number" [(ngModel)]="tStartString" (ngModelChange)="draw()"/></div>
-    <div class="d-flex flex-row p-1">t slut=<input class="flex-grow-1"  type="number" [(ngModel)]="tEndString" (ngModelChange)="draw()"/></div>
-    <div class="d-flex flex-row p-1">t antal stykker=<input class="flex-grow-1" type="number" max="1000" [(ngModel)]="tStepsString" (ngModelChange)="draw()"/></div>
+    <div class="d-flex flex-row p-1 pt-3">t start=<input class="flex-grow-1" style="min-width: 0px" type="number" [(ngModel)]="tStartString" (ngModelChange)="draw()"/></div>
+    <div class="d-flex flex-row p-1">t slut=<input class="flex-grow-1" style="min-width: 0px" type="number" [(ngModel)]="tEndString" (ngModelChange)="draw()"/></div>
+    <div class="d-flex flex-row p-1">t styk=<input class="flex-grow-1" style="min-width: 0px" type="number" max="1000" [(ngModel)]="tStepsString" (ngModelChange)="draw()"/></div>
     <!--<button (click)="draw()">Tegn linje</button>-->
     <button (click)="goFullscreen()">Fuldskærm</button>
   </div>
