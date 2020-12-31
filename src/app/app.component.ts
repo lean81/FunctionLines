@@ -111,12 +111,14 @@ export class AppComponent implements OnInit{
 
     this.ctx.strokeStyle = 'black';
     this.ctx.lineWidth = 1;
-    this.ctx.beginPath();
-    this.ctx.moveTo(allPoints[0].x, this.ctx.canvas.height - allPoints[0].y);
+
+    let prevPoint = allPoints[0];
     for (const p of allPoints) {
-      this.ctx.lineTo(p.x,  this.ctx.canvas.height - p.y);
-      // this.ctx.lineTo(this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+      this.ctx.beginPath();
+      this.ctx.lineTo(Math.round(prevPoint.x) + 0.5,  Math.round(this.ctx.canvas.height - prevPoint.y) + 0.5);
+      this.ctx.lineTo(Math.round(p.x) + 0.5,  Math.round(this.ctx.canvas.height - p.y) + 0.5);
       this.ctx.stroke();
+      prevPoint = p;
     }
   }
 
@@ -166,6 +168,17 @@ export class AppComponent implements OnInit{
   private setFunctionsWithLettersReplacedWithNumbers(): void {
     this.xEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.xEqualsString);
     this.yEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.yEqualsString);
+  }
+
+  public onWindowResize(event: any): void {
+    this.canvas.nativeElement.width = this.canvasDiv.nativeElement.clientWidth;
+    this.canvas.nativeElement.height = this.canvasDiv.nativeElement.clientHeight;
+    this.ctx = this.canvas.nativeElement.getContext('2d');
+    console.log(this.canvas.nativeElement.width + ' ' + this.canvas.nativeElement.height);
+    this.draw();
+    setTimeout(() => {
+      console.log(this.canvas.nativeElement.width + ' ' + this.canvas.nativeElement.height);
+    });
   }
 }
 

@@ -1,5 +1,5 @@
-<div class="d-flex flex-row" style="background-color:lightslategrey; height: 100vh; width: 100vw;" >
-  <div class="d-flex flex-grow-1 flex-column" style="max-width: 300px">
+<div class="d-flex flex-row" style="background-color:lightslategrey; height: 100vh; width: 100vw;" (window:resize)="onWindowResize($event)">
+  <div class="d-flex flex-grow-1 flex-column overflow-auto p-2" style="max-width: 300px">
     <div class="d-flex flex-row p-1">Navn<input class="flex-grow-1 pl-1" [(ngModel)]="name" (ngModelChange)="draw()"/></div>
     <div class="d-flex flex-row p-1">x=<input class="flex-grow-1" [(ngModel)]="xEqualsString" (ngModelChange)="draw()"/></div>
     {{xEqualsConstantReplaced}}
