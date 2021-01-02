@@ -26,6 +26,7 @@
     "@ng-bootstrap/ng-bootstrap": "^8.0.0",
     "@ng-bootstrap/schematics": "^2.0.0-alpha.1",
     "angular-bootstrap-slider": "^0.1.29",
+    "angular-disable-browser-back-button": "^1.0.2",
     "bootstrap": "^4.5.3",
     "bootstrap-slider": "^11.0.2",
     "rxjs": "~6.6.0",

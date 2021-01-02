@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {Vector2} from 'three';
 import {Constant} from './Constant';
 import {MatSliderChange} from '@angular/material/slider';
+import {State} from './State';
 
 
 
@@ -25,24 +26,14 @@ export class AppComponent implements OnInit{
   private ctx: CanvasRenderingContext2D;
 
   @Input()
-  public name: string;
-
-  @Input()
-  public xEqualsString = 'cos(t / 10) * 500 + a';
+  public state: State = new State();
   @Input()
   public xEqualsConstantReplaced = '';
   @Input()
-  public yEqualsString = 'sin(t / 10) * 500 + 500 + b';
-  @Input()
   public yEqualsConstantReplaced = '';
-  @Input()
-  public tStartString = 0;
-  @Input()
-  public tEndString = 100;
-  @Input()
-  public tStepsString = 100;
 
   public constants: Constant[] = [];
+
 
   public static replaceAll(input: string, substr: string, newSubstr: string): string{
     return input.split(substr).join(newSubstr);
@@ -60,8 +51,8 @@ export class AppComponent implements OnInit{
 
   public draw(): void {
     let constantsChars =  [...new Set(
-        [...AppComponent.getConstants(this.xEqualsString),
-      ...AppComponent.getConstants(this.yEqualsString)]
+        [...AppComponent.getConstants(this.state.xEqualsString),
+      ...AppComponent.getConstants(this.state.yEqualsString)]
     )];
 
     constantsChars = constantsChars.filter(c => c !== 't');
@@ -81,18 +72,18 @@ export class AppComponent implements OnInit{
 
     const constantCharsAsString = constantsChars.length === 0 ? '' : ',' + constantsChars.join(',');
 
-    const xReplacedT = ('(t' + constantCharsAsString + ')=>{return ' + this.xEqualsString + '}').replace('sin', 'Math.sin').replace('cos', 'Math.cos');
+    const xReplacedT = ('(t' + constantCharsAsString + ')=>{return ' + this.state.xEqualsString + '}').replace('sin', 'Math.sin').replace('cos', 'Math.cos');
     // tslint:disable-next-line:no-eval
     const xFunc = eval(xReplacedT);
 
-    const yReplacedT = ('(t' + constantCharsAsString + ')=>{return ' + this.yEqualsString + '}').replace('sin', 'Math.sin').replace('cos', 'Math.cos');
+    const yReplacedT = ('(t' + constantCharsAsString + ')=>{return ' + this.state.yEqualsString + '}').replace('sin', 'Math.sin').replace('cos', 'Math.cos');
     // tslint:disable-next-line:no-eval
     const yFunc = eval(yReplacedT);
 
-    const tStart = this.tStartString;
-    const tEnd = this.tEndString;
-    this.tStepsString = Math.min(this.tStepsString, 1000);
-    const tSteps = this.tStepsString;
+    const tStart = this.state.tStartString;
+    const tEnd = this.state.tEndString;
+    this.state.tStepsString = Math.min(this.state.tStepsString, 1000);
+    const tSteps = this.state.tStepsString;
     const allPoints: Vector2[] = [];
     const allConstantValues = this.constants.map(c => c.text);
     for (let i = 0; i < tSteps; i++){
@@ -166,8 +157,8 @@ export class AppComponent implements OnInit{
   }
 
   private setFunctionsWithLettersReplacedWithNumbers(): void {
-    this.xEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.xEqualsString);
-    this.yEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.yEqualsString);
+    this.xEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.state.xEqualsString);
+    this.yEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.state.yEqualsString);
   }
 
   public onWindowResize(event: any): void {
