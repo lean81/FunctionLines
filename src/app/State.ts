@@ -1,9 +1,10 @@
-import {Input} from '@angular/core';
+import {Injectable, Input} from '@angular/core';
 import {Constant} from './Constant';
 
+@Injectable()
 export class State {
   @Input()
-  public name: string;
+  public name = 'Første';
 
   @Input()
   public xEqualsString = 'cos(t / 10) * 500 + a';

@@ -1,9 +1,10 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Inject, Input, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {Vector2} from 'three';
 import {Constant} from './Constant';
 import {MatSliderChange} from '@angular/material/slider';
 import {State} from './State';
+import {DOCUMENT} from '@angular/common';
 
 
 
@@ -12,18 +13,22 @@ import {State} from './State';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
 
-  constructor(private router: Router) {
+  constructor(@Inject(DOCUMENT) public document: Document, private router: Router) {
   }
 
-  @ViewChild('canvas', { static: true })
+  @ViewChild('canvas', {static: true})
   public canvas: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('canvasDiv', { static: true })
+  @ViewChild('canvasDiv', {static: true})
   public canvasDiv: ElementRef<HTMLElement>;
 
   private ctx: CanvasRenderingContext2D;
+
+
+  @Input()
+  public allStates: State[] = [];
 
   @Input()
   public state: State = new State();
@@ -32,43 +37,40 @@ export class AppComponent implements OnInit{
   @Input()
   public yEqualsConstantReplaced = '';
 
-  public constants: Constant[] = [];
-
-
-  public static replaceAll(input: string, substr: string, newSubstr: string): string{
+  public static replaceAll(input: string, substr: string, newSubstr: string): string {
     return input.split(substr).join(newSubstr);
   }
 
-  public static removeAll(input: string, substr: string): string{
+  public static removeAll(input: string, substr: string): string {
     return AppComponent.replaceAll(input, substr, '');
   }
 
   static getConstants(formula: string): Set<string> {
-    let exprRemoved =  AppComponent.removeAll(formula, 'cos');
+    let exprRemoved = AppComponent.removeAll(formula, 'cos');
     exprRemoved = AppComponent.removeAll(exprRemoved, 'sin');
     return new Set(exprRemoved.replace(/[^a-zA-Z]+/g, ''));
   }
 
   public draw(): void {
-    let constantsChars =  [...new Set(
-        [...AppComponent.getConstants(this.state.xEqualsString),
-      ...AppComponent.getConstants(this.state.yEqualsString)]
+    let constantsChars = [...new Set(
+      [...AppComponent.getConstants(this.state.xEqualsString),
+        ...AppComponent.getConstants(this.state.yEqualsString)]
     )];
 
     constantsChars = constantsChars.filter(c => c !== 't');
     constantsChars.sort((one, two) => (one > two ? 1 : -1));
     for (const constant of constantsChars) {
-      if (this.constants.find(c => c.name === constant)) {
+      if (this.state.constants.find(c => c.name === constant)) {
         continue;
       }
-      this.constants.push({name: constant, text: 1, sliderFrom: 0, sliderTo: 100});
+      this.state.constants.push({name: constant, text: 1, sliderFrom: 0, sliderTo: 100});
     }
 
     this.setFunctionsWithLettersReplacedWithNumbers();
 
     // Remove aditional constant items
-    this.constants = this.constants.filter(c => constantsChars.find(cc => cc === c.name));
-    this.constants.sort((one, two) => (one.name > two.name ? 1 : -1));
+    this.state.constants = this.state.constants.filter(c => constantsChars.find(cc => cc === c.name));
+    this.state.constants.sort((one, two) => (one.name > two.name ? 1 : -1));
 
     const constantCharsAsString = constantsChars.length === 0 ? '' : ',' + constantsChars.join(',');
 
@@ -85,8 +87,8 @@ export class AppComponent implements OnInit{
     this.state.tStepsString = Math.min(this.state.tStepsString, 1000);
     const tSteps = this.state.tStepsString;
     const allPoints: Vector2[] = [];
-    const allConstantValues = this.constants.map(c => c.text);
-    for (let i = 0; i < tSteps; i++){
+    const allConstantValues = this.state.constants.map(c => c.text);
+    for (let i = 0; i < tSteps; i++) {
       const t = tStart + (tEnd - tStart) * i;
       const p = new Vector2(xFunc(t, ...allConstantValues), yFunc(t, ...allConstantValues));
       allPoints.push(p);
@@ -106,8 +108,8 @@ export class AppComponent implements OnInit{
     let prevPoint = allPoints[0];
     for (const p of allPoints) {
       this.ctx.beginPath();
-      this.ctx.lineTo(Math.round(prevPoint.x) + 0.5,  Math.round(this.ctx.canvas.height - prevPoint.y) + 0.5);
-      this.ctx.lineTo(Math.round(p.x) + 0.5,  Math.round(this.ctx.canvas.height - p.y) + 0.5);
+      this.ctx.lineTo(Math.round(prevPoint.x) + 0.5, Math.round(this.ctx.canvas.height - prevPoint.y) + 0.5);
+      this.ctx.lineTo(Math.round(p.x) + 0.5, Math.round(this.ctx.canvas.height - p.y) + 0.5);
       this.ctx.stroke();
       prevPoint = p;
     }
@@ -138,7 +140,7 @@ export class AppComponent implements OnInit{
     }
   }
 
-  private  getFunctionsWithLettersReplacedWithNumbers(rawFunction: string): string {
+  private getFunctionsWithLettersReplacedWithNumbers(rawFunction: string): string {
     const expressions = ['sin', 'cos'];
 
     let str = rawFunction;
@@ -146,7 +148,7 @@ export class AppComponent implements OnInit{
       str = AppComponent.replaceAll(str, expr, '#' + expressions.indexOf(expr) + '#');
     }
 
-    for (const constant of this.constants) {
+    for (const constant of this.state.constants) {
       str = AppComponent.replaceAll(str, constant.name, constant.text.toString());
     }
 
@@ -170,6 +172,25 @@ export class AppComponent implements OnInit{
     setTimeout(() => {
       console.log(this.canvas.nativeElement.width + ' ' + this.canvas.nativeElement.height);
     });
+  }
+
+  public saveClicked(): void {
+    if (!this.state.name) {
+      alert('Der skal skrives et navn');
+    }
+
+    this.allStates.push(this.state);
+    const stateJson = JSON.stringify(this.allStates);
+    localStorage.setItem('allStates', stateJson);
+  }
+
+  public openClicked(): void {
+    this.allStates = JSON.parse(localStorage.getItem('allStates')) ?? [];
+    if (this.allStates.length === 0) {
+      this.allStates.push(new State());
+    }
+    this.state = this.allStates[0];
+    this.draw();
   }
 }
 
