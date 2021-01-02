@@ -1,4 +1,4 @@
-<div class="d-flex flex-row" style="background-color:lightslategrey; height: 100vh; width: 100vw;" (window:resize)="onWindowResize($event)">
+<div *ngIf="mode === Mode.normal" class="d-flex flex-row" style="background-color:lightslategrey; height: 100vh; width: 100vw;" (window:resize)="onWindowResize($event)">
   <div class="d-flex flex-grow-1 flex-column overflow-auto p-2 pr-5" style="max-width: 300px">
     <b>{{state.name}}</b>
     <div class="d-flex flex-row p-1">x=<input class="flex-grow-1" [(ngModel)]="state.xEqualsString" (ngModelChange)="draw()"/></div>
@@ -21,11 +21,19 @@
 
     <div class="d-flex flex-row p-1 pt-2">Navn<input class="flex-grow-1 pl-1" [(ngModel)]="state.name" (ngModelChange)="draw()"/></div>
     <button class="mt-3" (click)="saveClicked()">Gem</button>
-    <button class="mt-3" (click)="openClicked()" >Åben</button>
+    <button class="mt-3" (click)="showOpenDialog()" >Åben</button>
     <button class="mt-3" *ngIf="!(document.fullscreenElement)" (click)="goFullscreen()">Fuldskærm</button>
 
   </div>
   <div #canvasDiv class="d-flex flex-grow-1">
       <canvas #canvas class="w-100 h-100"></canvas>
   </div>
+</div>
+<div *ngIf="mode === Mode.open" class="d-flex flex-column overflow-auto mat-background-primary" style="background-color:lightslategrey; height: 100vh; width: 100vw; " (window:resize)="onWindowResize($event)">
+  <button (click)="closeOpenDialog()">Luk</button>
+  <mat-card *ngFor="let state of allStates" class="m-2"  style="width: 400px; cursor: pointer" (click)="openClicked(state)">
+    <mat-card-title>{{state.name}}</mat-card-title>
+    <mat-card-subtitletitle>x = {{state.xEqualsString}}</mat-card-subtitletitle><br>
+    <mat-card-subtitletitle>y = {{state.yEqualsString}}</mat-card-subtitletitle>
+  </mat-card>
 </div>

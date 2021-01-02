@@ -6,7 +6,10 @@ import {MatSliderChange} from '@angular/material/slider';
 import {State} from './State';
 import {DOCUMENT} from '@angular/common';
 
-
+enum Mode {
+  normal = 1,
+  open = 2
+}
 
 @Component({
   selector: 'app-root',
@@ -18,10 +21,10 @@ export class AppComponent implements OnInit {
   constructor(@Inject(DOCUMENT) public document: Document, private router: Router) {
   }
 
-  @ViewChild('canvas', {static: true})
+  @ViewChild('canvas', {static: false})
   public canvas: ElementRef<HTMLCanvasElement>;
 
-  @ViewChild('canvasDiv', {static: true})
+  @ViewChild('canvasDiv', {static: false})
   public canvasDiv: ElementRef<HTMLElement>;
 
   private ctx: CanvasRenderingContext2D;
@@ -36,6 +39,9 @@ export class AppComponent implements OnInit {
   public xEqualsConstantReplaced = '';
   @Input()
   public yEqualsConstantReplaced = '';
+
+  public Mode = Mode;
+  public mode = Mode.normal;
 
   public static replaceAll(input: string, substr: string, newSubstr: string): string {
     return input.split(substr).join(newSubstr);
@@ -52,6 +58,10 @@ export class AppComponent implements OnInit {
   }
 
   public draw(): void {
+    if (!this.canvas || ! this.canvasDiv) {
+      return;
+    }
+
     let constantsChars = [...new Set(
       [...AppComponent.getConstants(this.state.xEqualsString),
         ...AppComponent.getConstants(this.state.yEqualsString)]
@@ -163,15 +173,14 @@ export class AppComponent implements OnInit {
     this.yEqualsConstantReplaced = this.getFunctionsWithLettersReplacedWithNumbers(this.state.yEqualsString);
   }
 
-  public onWindowResize(event: any): void {
+  public onWindowResize(event: any = null): void {
+    if (!this.canvas || ! this.canvasDiv) {
+      return;
+    }
     this.canvas.nativeElement.width = this.canvasDiv.nativeElement.clientWidth;
     this.canvas.nativeElement.height = this.canvasDiv.nativeElement.clientHeight;
     this.ctx = this.canvas.nativeElement.getContext('2d');
-    console.log(this.canvas.nativeElement.width + ' ' + this.canvas.nativeElement.height);
     this.draw();
-    setTimeout(() => {
-      console.log(this.canvas.nativeElement.width + ' ' + this.canvas.nativeElement.height);
-    });
   }
 
   public saveClicked(): void {
@@ -184,13 +193,27 @@ export class AppComponent implements OnInit {
     localStorage.setItem('allStates', stateJson);
   }
 
-  public openClicked(): void {
+  public openClicked(clickedState: State): void {
+      this.state = clickedState;
+      this.mode = Mode.normal;
+      setTimeout(() => {
+        this.onWindowResize();
+      });
+  }
+
+  public showOpenDialog(): void {
     this.allStates = JSON.parse(localStorage.getItem('allStates')) ?? [];
     if (this.allStates.length === 0) {
       this.allStates.push(new State());
     }
-    this.state = this.allStates[0];
-    this.draw();
+    this.mode = Mode.open;
+  }
+
+  public closeOpenDialog(): void {
+    this.mode = Mode.normal;
+    setTimeout(() => {
+      this.onWindowResize();
+    });
   }
 }
 

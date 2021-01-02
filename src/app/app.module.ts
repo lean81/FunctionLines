@@ -6,9 +6,9 @@ import { ShowCardComponent } from './show-card/show-card.component';
 import {RouterModule, Routes} from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import {FormsModule} from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatSliderModule} from '@angular/material/slider';
 import {BackButtonDisableModule} from 'angular-disable-browser-back-button';
+import {MatCardModule} from '@angular/material/card';
 
 const appRoutes: Routes = [
   { path: 'showCard', component: ShowCardComponent },
@@ -26,6 +26,7 @@ const appRoutes: Routes = [
     NgbModule,
     FormsModule,
     MatSliderModule,
+    MatCardModule,
     BackButtonDisableModule.forRoot()
   ],
   exports: [ RouterModule ],
